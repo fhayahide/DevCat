@@ -6,3 +6,7 @@
 * HTML/CSS
 * javaScript
 * electron
+
+## ゲームについて
+* 縦スクロール
+* 自機を操作して敵機を倒す(ボス戦のみ)
