@@ -4,13 +4,17 @@ class InterfaceMan{
 	private String msgBa = "はずれ";
 	public int inum;
 
-	public InterfaceMan(){
-		In_number();
-	}
-
 	public int In_number(){
 		System.out.println(msgIn);
 		inum = new java.util.Scanner(System.in).nextInt();
 		return inum;
+	}
+
+	public void Bingo(){
+		System.out.println(msgMa);
+	}
+
+	public void Miss(){
+		System.out.println(msgBa);
 	}
 }
