@@ -2,7 +2,7 @@ import java.util.*;
 class Quizman{
 
 	Random rnd = new Random();
-	private int seikai = rnd.nextInt(10);
+	int seikai = rnd.nextInt(10);
 	int hantei;
 		public void hantei(int ans){	
 			if (ans!=seikai) {
