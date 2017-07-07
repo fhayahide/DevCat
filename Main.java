@@ -16,6 +16,8 @@ public class Main{
 				break;
 			}
 		}
+		if (qm.hantei==1) {
 		im.Bingo();
+		}
 	}
 }
