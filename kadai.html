@@ -25,9 +25,11 @@
     var enemyList = []; // 敵の配列
     var bulletList = []; // 発射弾の配列
     var enemybulletList = []; // 敵発射弾の配列
-    var count = 0; // フレーム番号
+    var count = 0;
+    var Fcount = 0; // フレームカウント
     var Bcount = 0;
     var scoreNum = 0; // スコア
+    var move_x = 1;
     var move_y = 1;
     var enemy_HP = 30;
     var STAGE_W = 960; // 画面サイズ
@@ -48,7 +50,7 @@
     createjs.Ticker.addEventListener("tick", handleTick);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keydown", bullets);
-  
+
   function handleKeyDown(event) {
     var keyCode = event.keyCode;
     if (keyCode == 39) { // 右
@@ -84,8 +86,9 @@
   }
 
 
-
   function handleTick() {
+    Bcount = Bcount + 1;
+
     if (count != 1) {
       var enemy = new createjs.Shape();
       enemy.graphics.beginFill("orange").moveTo(0, +10).lineTo(-10, -10).lineTo(+10, -10).closePath();
@@ -95,15 +98,6 @@
       enemyList.push(enemy); // 配列に保存
       count = 1;
     }
-    // Bcount = Bcount ++;
-    // if (Bcount % 120) {
-    // 	var ebullet = new createjs.Shape();
-    // 		ebullet.graphics.beginFill("orange").drawCircle(0,0,3);
-    // 		ebullet.x = enemy.x + 30;
-    // 		ebullet.y = enemy.y;
-    // 		stage.addChild(ebullet);
-    // 		enemybulletList.push(ebullet);
-    // }
 
     for (var i = 0; i < bulletList.length; i++) {
       bulletList[i].y -= 10;
@@ -114,8 +108,32 @@
       }
     }
 
+    for (var i = 0; i < enemybulletList.length; i++) {
+      enemybulletList[i].y += 3;
+      if (enemybulletList[i].y < 0) {
+        stage.removeChild(enemybulletList[i]);
+        enemybulletList.splice(i,1);
+      }
+    }
+
     for (var i = 0; i < enemyList.length; i++) {
+      //弾を出す処理(1秒ごと)
+      if (Fcount % 60 == 0) {
+        var ebullet = new createjs.Shape();
+          ebullet.graphics.beginFill("orange").drawCircle(0,0,3);
+          ebullet.x = enemyList[i].x;
+          ebullet.y = enemyList[i].y;
+          stage.addChild(ebullet);
+          enemybulletList.push(ebullet);
+      }
+
       enemyList[i].y += move_y;
+      enemyList[i].x += move_x;
+        if (enemyList[i].x >= STAGE_W) {
+          move_x = 1 * -1;
+        } else if (enemyList[i].x <= 0) {
+          move_x = 1 * 1;
+        }
         // 画面端まで移動したら
         if (enemyList[i].y >= STAGE_H/2){
         	move_y = 0;
@@ -129,6 +147,16 @@
       showGameFin()
     }
 
+    for (var i=0; i<enemybulletList.length; i++){
+      var ebullet = enemybulletList[i];
+      var hi = ebullet.localToLocal(0, 0, player);
+      if (player.hitTest(hi.x, hi.y) == true){
+        stage.removeChild(ebullet);
+        enemybulletList.splice(i,1);
+        showGameOver();
+      }
+    }
+
     for (var j = 0; j < enemyList.length; j++) {
       for (var i = 0; i < bulletList.length; i++) {
         var bullet = bulletList[i];
@@ -136,6 +164,7 @@
         // 敵から見た発射弾のローカル座標を取得
         var pt = bullet.localToLocal(0, 0, enemy);
         // 当たり判定を行う
+
         if (enemy.hitTest(pt.x, pt.y) == true) {
           // 発射弾の削除
           stage.removeChild(bullet);
@@ -144,14 +173,26 @@
           // スコアの更新
           scoreNum += 50;
           score.text = String(scoreNum);
+          if (enemy_HP <= 0){
+            // 敵の削除
+            stage.removeChild(enemyList[j]);
+            enemyList.splice(j, 1);
+            showGameFin();
+          }
           break;
         }
-        if (enemy_HP == 0){
-        	// 敵の削除
-          stage.removeChild(enemyList[j]);
-          enemyList.splice(j, 1);
-        }
       }
+    }
+    Fcount ++;
+
+    if(Fcount == 300){
+      var r = Math.floor( Math.random() * 2);
+      if(r == 1){
+        move_x = 1 * 1;
+      }else if (r == 0){
+        move_x = 1 * -1;
+      }
+      Fcount = 0;
     }
     stage.update();
   }
