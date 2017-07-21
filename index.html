@@ -45,7 +45,6 @@
     var players = 5;
 
     var score = new createjs.Text("", "24px sans-serif", "white");
-    var hp = new createjs.Text("", "24px sans-serif", "white");
     stage.addChild(score);
 
     createjs.Ticker.setFPS(60);
@@ -120,16 +119,16 @@ var pressedKeys = new Array();
       }
 
       //left
-      if(pressedKeys[2] && (player.x>=0)){
+      if(pressedKeys[2] && (player.x>0)){
         player.x -= players;
       }
 
       //right
-      if(pressedKeys[3] && (player.x<=STAGE_W)){
+      if(pressedKeys[3] && (player.x<STAGE_W)){
         player.x += players;
       }
 
-      if(pressedKeys[4] && ()){
+      if(pressedKeys[4]){
         var bullet = new createjs.Shape();
       bullet.graphics.beginFill("white").drawCircle(0, 0, 3);
       bullet.x = player.x;
