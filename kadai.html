@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>弾幕ゲー</title>
+  <style>
+    canvas {
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>弾幕ごっこ</h1>
+  <hr>
+  <canvas id="myCanvas" width="960" height="540"></canvas>
+<!--   <div><h3>矢印キー←→で移動できます</h3><br>
+  <h3>Zキーで弾を発射できます</h3><br>
+  <h3>上から降ってくる敵が一番下までたどり着いたら負けです</h3><br>
+  <h3>3000点でゲームクリアです</h3><br></div> -->
+  <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script>
+    window.addEventListener('load', init);
+    function init(){
+    var stage = new createjs.Stage('myCanvas');
+    var enemyList = []; // 敵の配列
+    var bulletList = []; // 発射弾の配列
+    var enemybulletList = []; // 敵発射弾の配列
+    var count = 0;
+    var Fcount = 0; // フレームカウント
+    var Bcount = 0;
+    var scoreNum = 0; // スコア
+    var move_x = 1;
+    var move_y = 1;
+    var enemy_HP = 600;//(50倍)
+    var STAGE_W = 960; // 画面サイズ
+    var STAGE_H = 540;
+    var player = new createjs.Shape();
+    player.graphics.beginFill("red")
+    .moveTo(0, -10)
+    .lineTo(-10, +10)
+    .lineTo(+10, +10);
+    stage.addChild(player);
+    player.x = STAGE_W / 2;
+    player.y = STAGE_H-25;
+    var players = 5;
+
+    var score = new createjs.Text("", "24px sans-serif", "white");
+    var hp = new createjs.Text("", "24px sans-serif", "white");
+    stage.addChild(score);
+
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener("tick", handleTick);
+    createjs.Ticker.addEventListener("tick", movePlayer);
+    window.addEventListener("keydown",onKeyDown,false);
+    window.addEventListener("keyup",onKeyUp,false);
+
+var pressedKeys = new Array();
+   function onKeyDown(e){
+    switch(e.keyCode){
+      case 38://up
+      case 87://w
+        pressedKeys[0] = true;
+        break;
+      case 40://down
+      case 83://s
+        pressedKeys[1] = true;
+        break;
+      case 37://left
+      case 65://a
+        pressedKeys[2] = true;
+        break;
+      case 39://right
+      case 68://d
+        pressedKeys[3] = true;
+        break;
+      case 32://shoot
+        pressedKeys[4] = true;
+        break;
+      default:
+        break;
+    }
+    }
+
+  function onKeyUp(e){
+    switch(e.keyCode){
+      case 38://up
+      case 87://w
+        pressedKeys[0] = false;
+        break;
+      case 40://down
+      case 83://s
+        pressedKeys[1] = false;
+        break;
+      case 37://left
+      case 65://a
+        pressedKeys[2] = false;
+        break;
+      case 39://right
+      case 68://d
+        pressedKeys[3] = false;
+        break;
+      case 32://shoot
+        pressedKeys[4] = false;
+        break;
+      default:
+        break;
+    }
+    }
+
+  function movePlayer(){
+
+      //up
+      if(pressedKeys[0] && (player.y>0)){
+        player.y -= players;
+      }
+
+      //down
+      if(pressedKeys[1] && (player.y<STAGE_H)){
+        player.y += players;
+      }
+
+      //left
+      if(pressedKeys[2] && (player.x>=0)){
+        player.x -= players;
+      }
+
+      //right
+      if(pressedKeys[3] && (player.x<=STAGE_W)){
+        player.x += players;
+      }
+
+      if(pressedKeys[4] && ()){
+        var bullet = new createjs.Shape();
+      bullet.graphics.beginFill("white").drawCircle(0, 0, 3);
+      bullet.x = player.x;
+      bullet.y = player.y;
+      stage.addChild(bullet); // 画面に表示
+      bulletList.push(bullet); // 配列に保存
+      }
+
+    }
+
+
+  function handleTick() {
+    Bcount = Bcount + 1;
+
+    if (count != 1) {
+      var enemy = new createjs.Shape();
+      enemy.graphics.beginFill("orange").moveTo(0, +10).lineTo(-10, -10).lineTo(+10, -10).closePath();
+      enemy.x = STAGE_W/2
+      enemy.y = 0;
+      stage.addChild(enemy); // 画面に表示
+      enemyList.push(enemy); // 配列に保存
+      count = 1;
+    }
+
+    for (var i = 0; i < bulletList.length; i++) {
+      bulletList[i].y -= 10;
+      // 画面端まで移動したら
+      if (bulletList[i].y < 0) {
+        stage.removeChild(bulletList[i]); // 画面から削除
+        bulletList.splice(i, 1); // 配列から削除
+      }
+    }
+
+    for (var i = 0; i < enemybulletList.length; i++) {
+      enemybulletList[i].y += 3;
+      if (enemybulletList[i].y < 0) {
+        stage.removeChild(enemybulletList[i]);
+        enemybulletList.splice(i,1);
+      }
+    }
+
+    for (var i = 0; i < enemyList.length; i++) {
+      //弾を出す処理(1秒ごと)
+      if (Fcount % 60 == 0) {
+        var ebullet = new createjs.Shape();
+          ebullet.graphics.beginFill("orange").drawCircle(0,0,3);
+          ebullet.x = enemyList[i].x;
+          ebullet.y = enemyList[i].y;
+          stage.addChild(ebullet);
+          enemybulletList.push(ebullet);
+      }
+
+      enemyList[i].y += move_y;
+      enemyList[i].x += move_x;
+        if (enemyList[i].x >= STAGE_W) {
+          move_x = 1 * -1;
+        } else if (enemyList[i].x <= 0) {
+          move_x = 1 * 1;
+        }
+        // 画面端まで移動したら
+        if (enemyList[i].y >= STAGE_H/2){
+        	move_y = 0;
+        }
+        if (enemyList[i].y >= STAGE_H) {
+        showGameOver(); // ゲームオーバー処理へ
+      }
+    }
+
+    // if (scoreNum>=3000){
+    //   showGameFin()
+    // }
+
+    for (var i=0; i<enemybulletList.length; i++){
+      var ebullet = enemybulletList[i];
+      var hi = ebullet.localToLocal(0, 0, player);
+      if (player.hitTest(hi.x, hi.y) == true){
+        stage.removeChild(ebullet);
+        enemybulletList.splice(i,1);
+        showGameOver();
+      }
+    }
+
+    for (var j = 0; j < enemyList.length; j++) {
+      for (var i = 0; i < bulletList.length; i++) {
+        var bullet = bulletList[i];
+        var enemy = enemyList[j];
+        // 敵から見た発射弾のローカル座標を取得
+        var pt = bullet.localToLocal(0, 0, enemy);
+        // 当たり判定を行う
+
+        if (enemy.hitTest(pt.x, pt.y) == true) {
+          // 発射弾の削除
+          stage.removeChild(bullet);
+          bulletList.splice(i, 1);
+          enemy_HP --;
+          // スコアの更新
+          scoreNum += 50;
+          score.text = String(scoreNum);
+          if (enemy_HP <= 0){
+            // 敵の削除
+            stage.removeChild(enemyList[j]);
+            enemyList.splice(j, 1);
+            showGameFin();
+          }
+          break;
+        }
+      }
+    }
+    Fcount ++;
+
+    if(Fcount == 300){
+      var r = Math.floor( Math.random() * 2);
+      if(r == 1){
+        move_x = 1 * 1;
+      }else if (r == 0){
+        move_x = 1 * -1;
+      }
+      Fcount = 0;
+    }
+    stage.update();
+  }
+
+  function showGameOver() {
+    alert("ゲームオーバー！ あなたのスコアは " + scoreNum + " でした。");
+        // 各種イベントをまとめて解除
+        createjs.Ticker.removeAllEventListeners();
+        stage.removeAllEventListeners();
+    }
+
+      function showGameFin() {
+    alert("ゲームクリア！");
+        // 各種イベントをまとめて解除
+        createjs.Ticker.removeAllEventListeners();
+        stage.removeAllEventListeners();
+    }
+}
+</script>
+
+
+</body>
+</html>
